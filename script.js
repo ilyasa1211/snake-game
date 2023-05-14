@@ -1,37 +1,40 @@
 var canvas = document.querySelector("canvas");
 var context = canvas.getContext("2d");
-class Meat {
-    constructor({ size }) {
+var Meat = /** @class */ (function () {
+    function Meat(_a) {
+        var size = _a.size;
         this.size = size;
         this.positionX = getIntegerRandomNumberBetween(0, TILE.width) *
             this.size;
         this.positionY = getIntegerRandomNumberBetween(0, TILE.height) *
             this.size;
     }
-}
-class Reptile {
-    constructor(snake) {
+    return Meat;
+}());
+var Snake = /** @class */ (function () {
+    function Snake(snake) {
         this.directionXY = snake.directionXY;
         this.speed = snake.speed;
         this.size = snake.size;
         this.positionX = snake.positionX * this.size;
         this.positionY = snake.positionY * this.size;
     }
-}
-const TILE = {
+    return Snake;
+}());
+var TILE = {
     width: 30,
     height: 40,
 };
-const SNAKE = new Reptile({
+var SNAKE = new Snake({
     directionXY: [1, 0],
     speed: 1,
     size: 10,
     positionX: Math.floor(TILE.width / 2),
     positionY: Math.floor(TILE.height / 2),
 });
-const FOOD = new Meat(SNAKE);
-const TAIL = [];
-const PREVIOUS = {
+var MEAT = new Meat(SNAKE);
+var TAIL = [];
+var PREVIOUS = {
     positionX: 0,
     positionY: 0,
 };
@@ -41,79 +44,83 @@ canvas.style.backgroundColor = "rgb(46,46,46)";
 window.addEventListener("keydown", function (event) {
     if (event.key === "ArrowLeft")
         SNAKE.directionXY = [-1, 0];
-    if (event.key === "ArrowRight")
+    else if (event.key === "ArrowRight")
         SNAKE.directionXY = [1, 0];
-    if (event.key === "ArrowDown")
+    else if (event.key === "ArrowDown")
         SNAKE.directionXY = [0, 1];
-    if (event.key === "ArrowUp")
+    else if (event.key === "ArrowUp")
         SNAKE.directionXY = [0, -1];
 });
-window.requestAnimationFrame(() => game(context, PREVIOUS, TAIL));
-let move = setInterval(() => {
-    const nextPosX = SNAKE.positionX +
-        SNAKE.directionXY[0] * SNAKE.speed * SNAKE.size;
-    const nextPosY = SNAKE.positionY +
-        SNAKE.directionXY[1] * SNAKE.speed * SNAKE.size;
-    PREVIOUS.positionX = SNAKE.positionX;
-    PREVIOUS.positionY = SNAKE.positionY;
-    SNAKE.positionX = Math.max(Math.min(nextPosX, canvas.width - SNAKE.size), 0);
-    SNAKE.positionY = Math.max(Math.min(nextPosY, canvas.height - SNAKE.size), 0);
-    if (isEatThePrey(SNAKE, FOOD)) {
-        FOOD.positionX = getIntegerRandomNumberBetween(0, TILE.width) * SNAKE.size;
-        FOOD.positionY = getIntegerRandomNumberBetween(0, TILE.height) * SNAKE.size;
-        TAIL.push({
-            positionX: PREVIOUS.positionX,
-            positionY: PREVIOUS.positionY,
+window.requestAnimationFrame(function () { return game(context, TAIL, SNAKE, MEAT); });
+var moveId = setInterval(function () { return move(SNAKE, PREVIOUS, MEAT, TAIL, TILE); }, 100);
+function updateTailPosition(previous, tails) {
+    for (var index = tails.length - 1; index >= 0; index--) {
+        tails[index].positionX = index === 0
+            ? previous.positionX
+            : tails[index - 1].positionX;
+        tails[index].positionY = index === 0
+            ? previous.positionY
+            : tails[index - 1].positionY;
+    }
+}
+function move(snake, previous, meat, tails, tile) {
+    var nextPosX = snake.positionX +
+        snake.directionXY[0] * snake.speed * snake.size;
+    var nextPosY = snake.positionY +
+        snake.directionXY[1] * snake.speed * snake.size;
+    previous.positionX = snake.positionX;
+    previous.positionY = snake.positionY;
+    snake.positionX = Math.max(Math.min(nextPosX, canvas.width - snake.size), 0);
+    snake.positionY = Math.max(Math.min(nextPosY, canvas.height - snake.size), 0);
+    if (isEatThePrey(snake, meat)) {
+        meat.positionX = getIntegerRandomNumberBetween(0, tile.width) * snake.size;
+        meat.positionY = getIntegerRandomNumberBetween(0, tile.height) * snake.size;
+        tails.push({
+            positionX: previous.positionX,
+            positionY: previous.positionY,
         });
     }
-    for (let index = TAIL.length - 1; index >= 0; index--) {
-        TAIL[index].positionX = index === 0
-            ? PREVIOUS.positionX
-            : TAIL[index - 1].positionX;
-        TAIL[index].positionY = index === 0
-            ? PREVIOUS.positionY
-            : TAIL[index - 1].positionY;
-    }
-}, 100);
-function game(context, previous, tails) {
+    updateTailPosition(previous, tails);
+}
+function game(context, tails, snake, meat) {
     clearCanvas(context);
     context.fillStyle = "white";
-    drawSnake(context);
-    drawTail(context, previous, tails);
-    drawFood(context, FOOD);
-    window.requestAnimationFrame(() => game(context, previous, tails));
+    drawSnake(context, snake);
+    drawTail(context, tails, snake);
+    drawFood(context, meat);
+    window.requestAnimationFrame(function () { return game(context, tails, snake, meat); });
 }
-function drawSnake(context) {
+function drawSnake(context, snake) {
     context.beginPath();
-    context.fillRect(SNAKE.positionX, SNAKE.positionY, SNAKE.size, SNAKE.size);
+    context.fillRect(snake.positionX, snake.positionY, snake.size, snake.size);
     context.fill();
     context.closePath();
 }
-function drawFood(context, food) {
+function drawFood(context, meat) {
     context.fillStyle = "red";
     context.beginPath();
-    context.rect(food.positionX, food.positionY, food.size, food.size);
+    context.rect(meat.positionX, meat.positionY, meat.size, meat.size);
     context.fill();
     context.closePath();
 }
-function drawTail(context, prev, tails) {
+function drawTail(context, tails, snake) {
     context.fillStyle = "white";
-    tails.forEach((tail) => {
+    tails.forEach(function (tail) {
         context.beginPath();
-        context.rect(tail.positionX, tail.positionY, SNAKE.size, SNAKE.size);
+        context.rect(tail.positionX, tail.positionY, snake.size, snake.size);
         context.fill();
         context.closePath();
     });
 }
-function isEatThePrey(snake, food) {
-    const foodCenterPositionX = food.positionX + food.size / 2;
-    const foodCenterPositionY = food.positionY + food.size / 2;
-    const isEatInX = foodCenterPositionX > snake.positionX &&
+function isEatThePrey(snake, meat) {
+    var foodCenterPositionX = meat.positionX + meat.size / 2;
+    var foodCenterPositionY = meat.positionY + meat.size / 2;
+    var isEatInX = foodCenterPositionX > snake.positionX &&
         foodCenterPositionX < snake.positionX + snake.size;
-    const isEatInY = foodCenterPositionY > snake.positionY &&
+    var isEatInY = foodCenterPositionY > snake.positionY &&
         foodCenterPositionY < snake.positionY + snake.size;
-    const isEat = isEatInX && isEatInY;
-    return isEat;
+    var isPreyInsideSnakeMouth = isEatInX && isEatInY;
+    return isPreyInsideSnakeMouth;
 }
 function clearCanvas(context) {
     context.clearRect(0, 0, canvas.width, canvas.height);

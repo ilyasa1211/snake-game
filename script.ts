@@ -1,14 +1,20 @@
 var canvas = document.querySelector("canvas") as HTMLCanvasElement;
 var context = canvas.getContext("2d") as CanvasRenderingContext2D;
 
-type Direction = -1 | 0 | 1;
+type Coordinate = -1 | 0 | 1;
 interface Reptile {
-  directionXY: Array<Direction>;
+  directionXY: [Coordinate, Coordinate];
   speed: number;
   size: number;
   positionX: number;
   positionY: number;
 }
+type Direction = {
+  right: [Coordinate, Coordinate];
+  left: [Coordinate, Coordinate];
+  up: [Coordinate, Coordinate];
+  down: [Coordinate, Coordinate];
+};
 type Previous = {
   positionX: number;
   positionY: number;
@@ -40,7 +46,7 @@ class Meat implements Food {
   }
 }
 class Snake implements Reptile {
-  public directionXY: Direction[];
+  public directionXY: [Coordinate, Coordinate];
   public speed: number;
   public size: number;
   public positionX: number;
@@ -57,6 +63,13 @@ class Snake implements Reptile {
 const TILE: Tile = {
   width: 30,
   height: 40,
+};
+
+const DIRECTION: Direction = {
+  left: [-1, 0],
+  right: [1, 0],
+  down: [0, 1],
+  up: [0, -1],
 };
 
 const SNAKE: Snake = new Snake({
@@ -81,10 +94,16 @@ canvas.height = TILE.height * SNAKE.size;
 canvas.style.backgroundColor = "rgb(46,46,46)";
 
 window.addEventListener("keydown", function (event: KeyboardEvent): void {
-  if (event.key === "ArrowLeft") SNAKE.directionXY = [-1, 0];
-  else if (event.key === "ArrowRight") SNAKE.directionXY = [1, 0];
-  else if (event.key === "ArrowDown") SNAKE.directionXY = [0, 1];
-  else if (event.key === "ArrowUp") SNAKE.directionXY = [0, -1];
+  if (event.key === "ArrowLeft" && directionIsNot(DIRECTION.right, SNAKE)) {
+    SNAKE.directionXY = DIRECTION.left;
+  } else if (
+    event.key === "ArrowRight" && directionIsNot(DIRECTION.left, SNAKE)
+  ) SNAKE.directionXY = DIRECTION.right;
+  else if (event.key === "ArrowDown" && directionIsNot(DIRECTION.up, SNAKE)) {
+    SNAKE.directionXY = DIRECTION.down;
+  } else if (event.key === "ArrowUp" && directionIsNot(DIRECTION.down, SNAKE)) {
+    SNAKE.directionXY = DIRECTION.up;
+  }
 });
 
 window.requestAnimationFrame(() => game(context, TAIL, SNAKE, MEAT));
@@ -93,6 +112,13 @@ let moveId: number = setInterval(
   () => move(SNAKE, PREVIOUS, MEAT, TAIL, TILE),
   100,
 );
+
+function directionIsNot(
+  direction: [Coordinate, Coordinate],
+  snake: Snake,
+): boolean {
+  return direction.toString() !== snake.directionXY.toString();
+}
 
 function updateTailPosition(previous: Previous, tails: Array<Tail>) {
   for (let index = tails.length - 1; index >= 0; index--) {

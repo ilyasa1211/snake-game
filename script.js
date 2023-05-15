@@ -25,6 +25,12 @@ var TILE = {
     width: 30,
     height: 40,
 };
+var DIRECTION = {
+    left: [-1, 0],
+    right: [1, 0],
+    down: [0, 1],
+    up: [0, -1],
+};
 var SNAKE = new Snake({
     directionXY: [1, 0],
     speed: 1,
@@ -42,17 +48,23 @@ canvas.width = TILE.width * SNAKE.size;
 canvas.height = TILE.height * SNAKE.size;
 canvas.style.backgroundColor = "rgb(46,46,46)";
 window.addEventListener("keydown", function (event) {
-    if (event.key === "ArrowLeft")
-        SNAKE.directionXY = [-1, 0];
-    else if (event.key === "ArrowRight")
-        SNAKE.directionXY = [1, 0];
-    else if (event.key === "ArrowDown")
-        SNAKE.directionXY = [0, 1];
-    else if (event.key === "ArrowUp")
-        SNAKE.directionXY = [0, -1];
+    if (event.key === "ArrowLeft" && directionIsNot(DIRECTION.right, SNAKE)) {
+        SNAKE.directionXY = DIRECTION.left;
+    }
+    else if (event.key === "ArrowRight" && directionIsNot(DIRECTION.left, SNAKE))
+        SNAKE.directionXY = DIRECTION.right;
+    else if (event.key === "ArrowDown" && directionIsNot(DIRECTION.up, SNAKE)) {
+        SNAKE.directionXY = DIRECTION.down;
+    }
+    else if (event.key === "ArrowUp" && directionIsNot(DIRECTION.down, SNAKE)) {
+        SNAKE.directionXY = DIRECTION.up;
+    }
 });
 window.requestAnimationFrame(function () { return game(context, TAIL, SNAKE, MEAT); });
 var moveId = setInterval(function () { return move(SNAKE, PREVIOUS, MEAT, TAIL, TILE); }, 100);
+function directionIsNot(direction, snake) {
+    return direction.toString() !== snake.directionXY.toString();
+}
 function updateTailPosition(previous, tails) {
     for (var index = tails.length - 1; index >= 0; index--) {
         tails[index].positionX = index === 0

@@ -44,6 +44,7 @@ var PREVIOUS = {
     positionX: 0,
     positionY: 0,
 };
+var gameOver = false;
 canvas.width = TILE.width * SNAKE.size;
 canvas.height = TILE.height * SNAKE.size;
 canvas.style.backgroundColor = "rgb(46,46,46)";
@@ -60,7 +61,9 @@ window.addEventListener("keydown", function (event) {
         SNAKE.directionXY = DIRECTION.up;
     }
 });
-window.requestAnimationFrame(function () { return game(context, TAIL, SNAKE, MEAT); });
+var start = window.requestAnimationFrame(function () {
+    return game(context, TAIL, SNAKE, MEAT);
+});
 var moveId = setInterval(function () { return move(SNAKE, PREVIOUS, MEAT, TAIL, TILE); }, 100);
 function directionIsNot(direction, snake) {
     return direction.toString() !== snake.directionXY.toString();
@@ -80,10 +83,29 @@ function move(snake, previous, meat, tails, tile) {
         snake.directionXY[0] * snake.speed * snake.size;
     var nextPosY = snake.positionY +
         snake.directionXY[1] * snake.speed * snake.size;
+    var collideWithRightWall = nextPosX + snake.size > canvas.width;
+    var collideWithLeftWall = nextPosX < 0;
+    var collideWithBottomWall = nextPosY + snake.size > canvas.height;
+    var collideWithAboveWall = nextPosY < 0;
+    var collideWithWall = collideWithAboveWall ||
+        collideWithRightWall || collideWithLeftWall || collideWithBottomWall;
     previous.positionX = snake.positionX;
     previous.positionY = snake.positionY;
     snake.positionX = Math.max(Math.min(nextPosX, canvas.width - snake.size), 0);
     snake.positionY = Math.max(Math.min(nextPosY, canvas.height - snake.size), 0);
+    tails.forEach(function (tail) {
+        var snakeHeadHitDotX = nextPosX + snake.size / 2;
+        var snakeHeadHitDotY = nextPosY + snake.size / 2;
+        if (snakeHeadHitDotX >= tail.positionX &&
+            snakeHeadHitDotX <= tail.positionX + snake.size &&
+            snakeHeadHitDotY >= tail.positionY &&
+            snakeHeadHitDotY <= tail.positionY + snake.size) {
+            gameOver = true;
+        }
+    });
+    if (collideWithWall) {
+        gameOver = true;
+    }
     if (isEatThePrey(snake, meat)) {
         meat.positionX = getIntegerRandomNumberBetween(0, tile.width) * snake.size;
         meat.positionY = getIntegerRandomNumberBetween(0, tile.height) * snake.size;
@@ -100,7 +122,14 @@ function game(context, tails, snake, meat) {
     drawSnake(context, snake);
     drawTail(context, tails, snake);
     drawFood(context, meat);
-    window.requestAnimationFrame(function () { return game(context, tails, snake, meat); });
+    if (gameOver) {
+        var text = "Game Over!";
+        context.font = "50px Arial";
+        var measureText = context.measureText(text);
+        context.fillText(text, (canvas.width - measureText.width) / 2, (canvas.height + measureText.actualBoundingBoxAscent) / 2);
+        return window.cancelAnimationFrame(start);
+    }
+    start = window.requestAnimationFrame(function () { return game(context, tails, snake, meat); });
 }
 function drawSnake(context, snake) {
     context.beginPath();

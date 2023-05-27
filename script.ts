@@ -89,6 +89,8 @@ const PREVIOUS: Previous = {
   positionY: 0,
 };
 
+var gameOver: boolean = false;
+
 canvas.width = TILE.width * SNAKE.size;
 canvas.height = TILE.height * SNAKE.size;
 canvas.style.backgroundColor = "rgb(46,46,46)";
@@ -106,7 +108,9 @@ window.addEventListener("keydown", function (event: KeyboardEvent): void {
   }
 });
 
-window.requestAnimationFrame(() => game(context, TAIL, SNAKE, MEAT));
+let start = window.requestAnimationFrame(() =>
+  game(context, TAIL, SNAKE, MEAT)
+);
 
 let moveId: number = setInterval(
   () => move(SNAKE, PREVIOUS, MEAT, TAIL, TILE),
@@ -142,10 +146,35 @@ function move(
     snake.directionXY[0] * snake.speed * snake.size;
   const nextPosY: number = snake.positionY +
     snake.directionXY[1] * snake.speed * snake.size;
+
+  const collideWithRightWall: boolean = nextPosX + snake.size > canvas.width;
+  const collideWithLeftWall: boolean = nextPosX < 0;
+  const collideWithBottomWall: boolean = nextPosY + snake.size > canvas.height;
+  const collideWithAboveWall: boolean = nextPosY < 0;
+  const collideWithWall: boolean = collideWithAboveWall ||
+    collideWithRightWall || collideWithLeftWall || collideWithBottomWall;
+
   previous.positionX = snake.positionX;
   previous.positionY = snake.positionY;
   snake.positionX = Math.max(Math.min(nextPosX, canvas.width - snake.size), 0);
   snake.positionY = Math.max(Math.min(nextPosY, canvas.height - snake.size), 0);
+
+  tails.forEach((tail: Tail) => {
+    const snakeHeadHitDotX: number = nextPosX + snake.size / 2;
+    const snakeHeadHitDotY: number = nextPosY + snake.size / 2;
+    if (
+      snakeHeadHitDotX >= tail.positionX &&
+      snakeHeadHitDotX <= tail.positionX + snake.size &&
+      snakeHeadHitDotY >= tail.positionY &&
+      snakeHeadHitDotY <= tail.positionY + snake.size
+    ) {
+      gameOver = true;
+    }
+  });
+
+  if (collideWithWall) {
+    gameOver = true;
+  }
   if (isEatThePrey(snake, meat)) {
     meat.positionX = getIntegerRandomNumberBetween(0, tile.width) * snake.size;
     meat.positionY = getIntegerRandomNumberBetween(0, tile.height) * snake.size;
@@ -168,7 +197,18 @@ function game(
   drawSnake(context, snake);
   drawTail(context, tails, snake);
   drawFood(context, meat);
-  window.requestAnimationFrame(() => game(context, tails, snake, meat));
+  if (gameOver) {
+    let text: string = "Game Over!";
+    context.font = "50px Arial";
+    let measureText = context.measureText(text);
+    context.fillText(
+      text,
+      (canvas.width - measureText.width) / 2,
+      (canvas.height + measureText.actualBoundingBoxAscent) / 2,
+    );
+    return window.cancelAnimationFrame(start);
+  }
+  start = window.requestAnimationFrame(() => game(context, tails, snake, meat));
 }
 function drawSnake(context: CanvasRenderingContext2D, snake: Snake): void {
   context.beginPath();

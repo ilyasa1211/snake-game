@@ -33,7 +33,7 @@ class Game {
   }
 
   public setMessage(message: Message): void {
-    message.exec(this.canvas.context);
+    message.show(this.canvas.context);
   }
 
   public play() {

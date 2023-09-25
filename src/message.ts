@@ -1,5 +1,5 @@
 abstract class Message {
-  public abstract exec(context: CanvasRenderingContext2D): void;
+  public abstract show(context: CanvasRenderingContext2D): void;
 }
 
 class CenterMessage extends Message {
@@ -11,7 +11,7 @@ class CenterMessage extends Message {
     super();
   }
 
-  public exec(context: CanvasRenderingContext2D): void {
+  public show(context: CanvasRenderingContext2D): void {
     context.font = this.font;
     context.fillStyle = this.color;
     let measureText = context.measureText(this.message);

@@ -2,7 +2,7 @@ var htmlCanvas = document.querySelector("canvas") as HTMLCanvasElement;
 var context = htmlCanvas.getContext("2d") as CanvasRenderingContext2D;
 
 if (!context) {
-  console.error("Your browser does not support Canvas 2d");
+  throw new Error("Your browser does not support Canvas 2d");
 }
 
 type Coordinate = -1 | 0 | 1;

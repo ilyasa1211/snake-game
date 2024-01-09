@@ -1,0 +1,3 @@
+- add game over when snake is eat self
+- move food error on eat
+- add move food to random position in food helper

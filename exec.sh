@@ -1,0 +1,1 @@
+awk 'NF' files.txt | xargs cat > ./dist/out.sql

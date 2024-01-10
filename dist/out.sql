@@ -4,11 +4,15 @@ DROP TABLE IF EXISTS board;
 DROP TABLE IF EXISTS snake;
 DROP TABLE IF EXISTS control;
 DROP TABLE IF EXISTS food;
+
+
 -- DROP ALL FUNCTIONS
 
 
 DROP FUNCTION IF EXISTS get_board_middle_position;
 DROP FUNCTION IF EXISTS get_random_number_between;
+
+
 -- DROP ALL PROCEDURES
 
 DROP PROCEDURE IF EXISTS is_snake_eat_the_food;
@@ -36,7 +40,10 @@ DROP PROCEDURE IF EXISTS move_down;
 DROP PROCEDURE IF EXISTS board_clear;
 DROP PROCEDURE IF EXISTS board_simulate_object;
 DROP PROCEDURE IF EXISTS display;
-DROP PROCEDURE IF EXISTS get_board_size;-- UTILITIES
+DROP PROCEDURE IF EXISTS get_board_size;
+
+
+-- UTILITIES
 
 DELIMITER //
 

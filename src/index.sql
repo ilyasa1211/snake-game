@@ -20,8 +20,10 @@ BEGIN
         CALL is_snake_eat_the_food(snake_table_name, food_table_name, @is_snake_eat);
 
         IF @is_snake_eat = 1 THEN 
+            SELECT get_random_number_between(1, board_size) INTO @random_food_position_x;
+            SELECT get_random_number_between(1, board_size) INTO @random_food_position_y;
 
-            CALL move_food(food_table_name);
+            CALL move_food(food_table_name, @random_food_position_x, @random_food_position_y);
             CALL snake_grow();
         END IF;
 

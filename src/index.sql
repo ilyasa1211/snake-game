@@ -24,7 +24,7 @@ BEGIN
             SELECT get_random_number_between(1, board_size) INTO @random_food_position_y;
 
             CALL move_food(food_table_name, @random_food_position_x, @random_food_position_y);
-            CALL snake_grow();
+            CALL snake_grow(snake_table_name);
         END IF;
 
         CALL snake_move(snake_table_name, control_table_name, board_size);

@@ -26,3 +26,5 @@ DROP PROCEDURE IF EXISTS board_clear;
 DROP PROCEDURE IF EXISTS board_simulate_object;
 DROP PROCEDURE IF EXISTS display;
 DROP PROCEDURE IF EXISTS get_board_size;
+
+

@@ -457,17 +457,53 @@ BEGIN
     SET @next_position_x = @prev_position_x;
     SET @next_position_y = @prev_position_y;
 
+    -- Solid Border
+    -- snake will stop moving when reach border 
+
+    -- IF @direction IS NOT NULL THEN 
+    --     IF  @direction = 'U' AND @next_position_y - 1 > 0 THEN 
+    --         SET @next_position_y = @next_position_y - 1;
+    --     ELSEIF @direction = 'D' AND @next_position_y + 1 <= board_size THEN 
+    --         SET @next_position_y = @next_position_y + 1;
+    --     ELSEIF @direction = 'R' AND @next_position_x + 1 <= board_size THEN 
+    --         SET @next_position_x = @next_position_x + 1;
+    --     ELSEIF @direction = 'L' AND @next_position_x - 1 > 0 THEN 
+    --         SET @next_position_x = @next_position_x - 1;
+    --     END IF; 
+    -- END IF;
+
+
+    -- Portal Border
+    -- snake will go through border and appear at opposite border
+
     IF @direction IS NOT NULL THEN 
-        IF  @direction = 'U' AND @next_position_y - 1 > 0 THEN 
-            SET @next_position_y = @next_position_y - 1;
-        ELSEIF @direction = 'D' AND @next_position_y + 1 <= board_size THEN 
-            SET @next_position_y = @next_position_y + 1;
-        ELSEIF @direction = 'R' AND @next_position_x + 1 <= board_size THEN 
-            SET @next_position_x = @next_position_x + 1;
-        ELSEIF @direction = 'L' AND @next_position_x - 1 > 0 THEN 
-            SET @next_position_x = @next_position_x - 1;
+        IF  @direction = 'U' THEN
+            IF @next_position_y - 1 > 0 THEN 
+                SET @next_position_y = @next_position_y - 1;
+            ELSE
+                SET @next_position_y = board_size;
+            END IF;
+        ELSEIF @direction = 'D' THEN
+            IF @next_position_y + 1 <= board_size THEN
+                SET @next_position_y = @next_position_y + 1;
+            ELSE 
+                SET @next_position_y = 1;
+            END IF;
+        ELSEIF @direction = 'R' THEN
+            IF @next_position_x + 1 <= board_size THEN
+                SET @next_position_x = @next_position_x + 1;
+            ELSE 
+                SET @next_position_x = 1;
+            END IF;
+        ELSEIF @direction = 'L' THEN
+            IF @next_position_x - 1 > 0 THEN 
+                SET @next_position_x = @next_position_x - 1;
+            ELSE
+                SET @next_position_x = board_size;
+            END IF;
         END IF; 
     END IF;
+
 
     SET position_x = @next_position_x;
     SET position_y = @next_position_y;
@@ -606,6 +642,7 @@ BEGIN
         CALL is_snake_eat_the_food(snake_table_name, food_table_name, @is_snake_eat);
 
         IF @is_snake_eat = 1 THEN 
+
             CALL move_food(food_table_name);
             CALL snake_grow();
         END IF;
